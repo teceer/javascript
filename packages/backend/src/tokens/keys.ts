@@ -1,4 +1,4 @@
-import { API_URL, API_VERSION, MAX_CACHE_LAST_UPDATED_AT_SECONDS } from '../constants';
+import { API_URL, API_VERSION, JWKS_CACHE_TTL_MS, MAX_CACHE_LAST_UPDATED_AT_SECONDS } from '../constants';
 // DO NOT CHANGE: Runtime needs to be imported as a default export so that we can stub its dependencies with Sinon.js
 // For more information refer to https://sinonjs.org/how-to/stub-dependency/
 import runtime from '../runtime';
@@ -17,10 +17,7 @@ function getFromCache(kid: string) {
   return cache[kid];
 }
 
-function setInCache(
-  jwk: JsonWebKeyWithKid,
-  jwksCacheTtlInMs: number = 1000 * 60 * 60, // 1 hour
-) {
+function setInCache(jwk: JsonWebKeyWithKid, jwksCacheTtlInMs: number = JWKS_CACHE_TTL_MS) {
   cache[jwk.kid] = jwk;
   lastUpdatedAt = Date.now();
 
@@ -118,7 +115,7 @@ export async function loadClerkJWKFromRemote({
   apiVersion = API_VERSION,
   issuer,
   kid,
-  jwksCacheTtlInMs = 1000 * 60 * 60, // 1 hour,
+  jwksCacheTtlInMs = JWKS_CACHE_TTL_MS,
   skipJwksCache,
 }: LoadClerkJWKFromRemoteOptions): Promise<JsonWebKey> {
   const shouldRefreshCache = !getFromCache(kid) && reachedMaxCacheUpdatedAt();
