@@ -23,7 +23,6 @@ import {
   handleValueOrFn,
   isHttpOrHttps,
   nextJsVersionCanOverrideRequestHeaders,
-  setCustomAttributeOnRequest,
   setRequestHeadersOnNextResponse,
 } from './utils';
 
@@ -100,9 +99,7 @@ export const withClerkMiddleware: WithClerkMiddleware = (...args: unknown[]) => 
     }
 
     // Set auth result on request in a private property so that middleware can read it too
-    setCustomAttributeOnRequest(req, constants.Attributes.AuthStatus, requestState.status);
-    setCustomAttributeOnRequest(req, constants.Attributes.AuthMessage, requestState.message || '');
-    setCustomAttributeOnRequest(req, constants.Attributes.AuthReason, requestState.reason || '');
+    injectRequestState(requestState, (k, v) => Object.assign(req, { [k]: v }));
 
     // get result from provided handler
     const res = await handler(req, event);

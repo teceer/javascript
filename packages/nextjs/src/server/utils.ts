@@ -7,10 +7,6 @@ import type { RequestLike } from './types';
 
 type AuthKey = 'AuthStatus' | 'AuthMessage' | 'AuthReason';
 
-export function setCustomAttributeOnRequest(req: RequestLike, key: string, value: string): void {
-  Object.assign(req, { [key]: value });
-}
-
 export function getCustomAttributeFromRequest(req: RequestLike, key: string): string | null | undefined {
   // @ts-expect-error
   return key in req ? req[key] : undefined;
