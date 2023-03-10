@@ -1,5 +1,5 @@
-import type { AuthStatus, RequestState } from '@clerk/backend';
-import { constants, debugRequestState } from '@clerk/backend';
+import type { AuthStatus } from '@clerk/backend';
+import { constants, debugRequestState, injectRequestState } from '@clerk/backend';
 import type { NextMiddleware, NextMiddlewareResult } from 'next/dist/server/web/types';
 import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -32,12 +32,6 @@ interface WithClerkMiddleware {
 
   (): NextMiddleware;
 }
-
-export const decorateResponseWithObservabilityHeaders = (res: NextResponse, requestState: RequestState) => {
-  requestState.message && res.headers.set(constants.Headers.AuthMessage, encodeURIComponent(requestState.message));
-  requestState.reason && res.headers.set(constants.Headers.AuthReason, encodeURIComponent(requestState.reason));
-  requestState.status && res.headers.set(constants.Headers.AuthStatus, encodeURIComponent(requestState.status));
-};
 
 export const withClerkMiddleware: WithClerkMiddleware = (...args: unknown[]) => {
   const noop = () => undefined;
@@ -84,7 +78,7 @@ export const withClerkMiddleware: WithClerkMiddleware = (...args: unknown[]) => 
     // Therefore we have to resort to a public interstitial endpoint
     if (requestState.isUnknown) {
       const response = new NextResponse(null, { status: 401, headers: { 'Content-Type': 'text/html' } });
-      decorateResponseWithObservabilityHeaders(response, requestState);
+      injectRequestState(requestState, (k, v) => response.headers.set(k, v));
       return response;
     }
     if (requestState.isInterstitial) {
@@ -101,7 +95,7 @@ export const withClerkMiddleware: WithClerkMiddleware = (...args: unknown[]) => 
         }),
         { status: 401 },
       );
-      decorateResponseWithObservabilityHeaders(response, requestState);
+      injectRequestState(requestState, (k, v) => response.headers.set(k, v));
       return response;
     }
 

@@ -1,6 +1,4 @@
-import type { RequestState } from '@clerk/backend';
-import { constants, debugRequestState } from '@clerk/backend';
-import type { ServerResponse } from 'http';
+import { debugRequestState, injectRequestState } from '@clerk/backend';
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 
 import {
@@ -28,12 +26,6 @@ interface WithServerSideAuth {
   (opts?: WithServerSideAuthOptions): WithServerSideAuthResult<void>;
 }
 
-const decorateResponseWithObservabilityHeaders = (res: ServerResponse, requestState: RequestState) => {
-  requestState.message && res.setHeader(constants.Headers.AuthMessage, encodeURIComponent(requestState.message));
-  requestState.reason && res.setHeader(constants.Headers.AuthReason, encodeURIComponent(requestState.reason));
-  requestState.status && res.setHeader(constants.Headers.AuthStatus, encodeURIComponent(requestState.status));
-};
-
 /**
  * @deprecated The /ssr path is deprecated and will be removed in the next major release.
  * Use the exports from /server instead
@@ -50,13 +42,13 @@ export const withServerSideAuth: WithServerSideAuth = (cbOrOptions: any, options
     const requestState = await authenticateRequest(ctx, opts);
 
     if (requestState.isUnknown) {
-      decorateResponseWithObservabilityHeaders(ctx.res, requestState);
+      injectRequestState(requestState, (k, v) => ctx.res.setHeader(k, v));
       ctx.res.writeHead(401, { 'Content-Type': 'text/html' });
       ctx.res.end();
       return EMPTY_GSSP_RESPONSE;
     }
     if (requestState.isInterstitial) {
-      decorateResponseWithObservabilityHeaders(ctx.res, requestState);
+      injectRequestState(requestState, (k, v) => ctx.res.setHeader(k, v));
       ctx.res.writeHead(401, { 'Content-Type': 'text/html' });
       const interstitial = await clerkClient.remotePublicInterstitial({
         apiUrl: API_URL,
