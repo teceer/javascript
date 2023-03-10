@@ -200,19 +200,28 @@ export function unknownState<T>(options: T, reason: AuthReason, message = ''): U
   };
 }
 
+type ConstantType = 'Attributes' | 'Headers' | 'SearchParams';
 type InjectHandler = (key: string, value: string) => void;
-export function injectRequestState(requestState: RequestState, inject: InjectHandler) {
+export function injectRequestState(
+  requestState: RequestState,
+  inject: InjectHandler,
+  constantType: ConstantType = 'Headers',
+) {
   const { status, message, reason } = requestState;
-  status && inject(constants.Headers.AuthStatus, status);
-  message && inject(constants.Headers.AuthMessage, message);
-  reason && inject(constants.Headers.AuthReason, reason);
+  status && inject(constants[constantType].AuthStatus, status);
+  message && inject(constants[constantType].AuthMessage, message);
+  reason && inject(constants[constantType].AuthReason, reason);
 }
 
 type RetrieveHandler<T> = (req: T, key: string) => string | null | undefined;
-export function retrieveRequestState<TRequest>(req: TRequest, retrieve: RetrieveHandler<TRequest>) {
-  const status = retrieve(req, constants.Headers.AuthStatus);
-  const message = retrieve(req, constants.Headers.AuthMessage);
-  const reason = retrieve(req, constants.Headers.AuthReason);
+export function retrieveRequestState<TRequest>(
+  req: TRequest,
+  retrieve: RetrieveHandler<TRequest>,
+  constantType: ConstantType = 'Headers',
+) {
+  const status = retrieve(req, constants[constantType].AuthStatus);
+  const message = retrieve(req, constants[constantType].AuthMessage);
+  const reason = retrieve(req, constants[constantType].AuthReason);
 
   return { status, message, reason };
 }

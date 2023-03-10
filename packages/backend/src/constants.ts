@@ -32,6 +32,8 @@ const Headers = {
 
 const SearchParams = {
   AuthStatus: Headers.AuthStatus,
+  AuthReason: Headers.AuthReason,
+  AuthMessage: Headers.AuthMessage,
 } as const;
 
 const ContentTypes = {
