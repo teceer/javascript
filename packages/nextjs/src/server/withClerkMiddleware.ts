@@ -123,7 +123,11 @@ type HandleMiddlewareResultProps = {
   req: NextRequest;
   res: NextMiddlewareResult;
   authStatus: AuthStatus;
+<<<<<<< HEAD
   authReason: string | null;
+=======
+  authReason: any;
+>>>>>>> 7fee0867 (fix(nextjs): Retrieve authMessage & authReason in route handlers)
   authMessage: string | null;
 };
 
