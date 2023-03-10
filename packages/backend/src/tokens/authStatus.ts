@@ -5,6 +5,8 @@ import type { SignedInAuthObject, SignedOutAuthObject } from './authObjects';
 import { signedInAuthObject, signedOutAuthObject } from './authObjects';
 import type { TokenVerificationErrorReason } from './errors';
 
+import { constants } from '../constants';
+
 export enum AuthStatus {
   SignedIn = 'signed-in',
   SignedOut = 'signed-out',
@@ -196,4 +198,21 @@ export function unknownState<T>(options: T, reason: AuthReason, message = ''): U
     isUnknown: true,
     toAuth: () => null,
   };
+}
+
+type InjectHandler = (key: string, value: string) => void;
+export function injectRequestState(requestState: RequestState, inject: InjectHandler) {
+  const { status, message, reason } = requestState;
+  status && inject(constants.Headers.AuthStatus, status);
+  message && inject(constants.Headers.AuthMessage, message);
+  reason && inject(constants.Headers.AuthReason, reason);
+}
+
+type RetrieveHandler<T> = (req: T, key: string) => string | null | undefined;
+export function retrieveRequestState<TRequest>(req: TRequest, retrieve: RetrieveHandler<TRequest>) {
+  const status = retrieve(req, constants.Headers.AuthStatus);
+  const message = retrieve(req, constants.Headers.AuthMessage);
+  const reason = retrieve(req, constants.Headers.AuthReason);
+
+  return { status, message, reason };
 }
