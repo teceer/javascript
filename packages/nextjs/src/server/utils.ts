@@ -1,33 +1,24 @@
-import { constants } from '@clerk/backend';
+import type { RequestState } from '@clerk/backend';
+import { injectRequestState, retrieveRequestState } from '@clerk/backend';
 import type { RequestCookie } from 'next/dist/server/web/spec-extension/cookies';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 import type { RequestLike } from './types';
 
-type AuthKey = 'AuthStatus' | 'AuthMessage' | 'AuthReason';
-
-export function getCustomAttributeFromRequest(req: RequestLike, key: string): string | null | undefined {
-  // @ts-expect-error
-  return key in req ? req[key] : undefined;
-}
-
-export function getAuthKeyFromRequest(req: RequestLike, key: AuthKey): string | null | undefined {
-  return (
-    getCustomAttributeFromRequest(req, constants.Attributes[key]) ||
-    getHeader(req, constants.Headers[key]) ||
-    (key === 'AuthStatus' ? getQueryParam(req, constants.SearchParams.AuthStatus) : undefined)
-  );
-}
-
 // Tries to extract auth status from the request using several strategies
 // TODO: Rename Auth status and align the naming across media
-export function getAuthStatusFromRequest(req: RequestLike): string | null | undefined {
-  return (
-    getCustomAttributeFromRequest(req, constants.Attributes.AuthStatus) ||
-    getHeader(req, constants.Headers.AuthStatus) ||
-    getQueryParam(req, constants.SearchParams.AuthStatus)
-  );
+export function getAuthFromRequest(req: RequestLike) {
+  return {
+    ...retrieveRequestState(req, (req, k) => getQueryParam(req, k), 'SearchParams'),
+    ...retrieveRequestState(req, (req, k) => getHeader(req, k)),
+    ...retrieveRequestState(req, (req, k) => getCustomAttributeFromRequest(req, k), 'Attributes'),
+  };
+}
+
+function getCustomAttributeFromRequest(req: RequestLike, key: string): string | null | undefined {
+  // @ts-expect-error
+  return key in req ? req[key] : undefined;
 }
 
 function getQueryParam(req: RequestLike, name: string): string | null | undefined {
@@ -95,7 +86,7 @@ const MIDDLEWARE_HEADER_PREFIX = 'x-middleware-request' as string;
 export const setRequestHeadersOnNextResponse = (
   res: NextResponse | Response,
   req: NextRequest,
-  newHeaders: Record<string, string>,
+  requestState: RequestState,
 ) => {
   if (!res.headers.get(OVERRIDE_HEADERS)) {
     // Emulate a user setting overrides by explicitly adding the required nextjs headers
@@ -108,7 +99,7 @@ export const setRequestHeadersOnNextResponse = (
   }
 
   // Now that we have normalised res to include overrides, just append the new header
-  Object.entries(newHeaders).forEach(([key, val]) => {
+  injectRequestState(requestState, ([key, val]) => {
     res.headers.set(OVERRIDE_HEADERS, `${res.headers.get(OVERRIDE_HEADERS)},${key}`);
     res.headers.set(`${MIDDLEWARE_HEADER_PREFIX}-${key}`, val);
   });

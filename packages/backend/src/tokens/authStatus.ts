@@ -1,11 +1,10 @@
 import type { JwtPayload } from '@clerk/types';
 
 import { createBackendApiClient } from '../api';
+import { constants } from '../constants';
 import type { SignedInAuthObject, SignedOutAuthObject } from './authObjects';
 import { signedInAuthObject, signedOutAuthObject } from './authObjects';
 import type { TokenVerificationErrorReason } from './errors';
-
-import { constants } from '../constants';
 
 export enum AuthStatus {
   SignedIn = 'signed-in',
@@ -218,10 +217,14 @@ export function retrieveRequestState<TRequest>(
   req: TRequest,
   retrieve: RetrieveHandler<TRequest>,
   constantType: ConstantType = 'Headers',
-) {
-  const status = retrieve(req, constants[constantType].AuthStatus);
-  const message = retrieve(req, constants[constantType].AuthMessage);
-  const reason = retrieve(req, constants[constantType].AuthReason);
+): {
+  status: AuthStatus;
+  message: string;
+  reason: AuthReason;
+} {
+  const status = retrieve(req, constants[constantType].AuthStatus) as AuthStatus;
+  const message = retrieve(req, constants[constantType].AuthMessage) || '';
+  const reason = retrieve(req, constants[constantType].AuthReason) as AuthReason;
 
   return { status, message, reason };
 }

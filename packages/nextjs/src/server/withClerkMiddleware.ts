@@ -1,4 +1,4 @@
-import type { AuthStatus } from '@clerk/backend';
+import type { RequestState } from '@clerk/backend';
 import { constants, debugRequestState, injectRequestState } from '@clerk/backend';
 import type { NextMiddleware, NextMiddlewareResult } from 'next/dist/server/web/types';
 import type { NextFetchEvent, NextRequest } from 'next/server';
@@ -104,32 +104,18 @@ export const withClerkMiddleware: WithClerkMiddleware = (...args: unknown[]) => 
     // get result from provided handler
     const res = await handler(req, event);
 
-    const { status: authStatus, reason: authReason, message: authMessage } = requestState;
-
-    return handleMiddlewareResult({ req, res, authStatus, authReason, authMessage });
+    return handleMiddlewareResult({ req, res, requestState });
   };
 };
 
 type HandleMiddlewareResultProps = {
   req: NextRequest;
   res: NextMiddlewareResult;
-  authStatus: AuthStatus;
-<<<<<<< HEAD
-  authReason: string | null;
-=======
-  authReason: any;
->>>>>>> 7fee0867 (fix(nextjs): Retrieve authMessage & authReason in route handlers)
-  authMessage: string | null;
+  requestState: RequestState;
 };
 
 // Auth result will be set as both a query param & header when applicable
-export function handleMiddlewareResult({
-  req,
-  res,
-  authStatus,
-  authMessage,
-  authReason,
-}: HandleMiddlewareResultProps): NextMiddlewareResult {
+export function handleMiddlewareResult({ req, res, requestState }: HandleMiddlewareResultProps): NextMiddlewareResult {
   // pass-through case, convert to next()
   if (!res) {
     res = NextResponse.next();
@@ -140,7 +126,7 @@ export function handleMiddlewareResult({
     return res;
   }
 
-  let rewriteURL;
+  let rewriteURL: URL | undefined;
 
   // next() case, convert to a rewrite
   if (res.headers.get(nextConstants.Headers.NextResume) === '1') {
@@ -166,19 +152,12 @@ export function handleMiddlewareResult({
       // If we detect that the host app is using a nextjs installation that reliably sets the
       // request headers, we don't need to fall back to the searchParams strategy.
       // In this case, we won't set them at all in order to avoid having them visible in the req.url
-      setRequestHeadersOnNextResponse(res, req, {
-        [constants.Headers.AuthStatus]: authStatus,
-        [constants.Headers.AuthMessage]: authMessage || '',
-        [constants.Headers.AuthReason]: authReason || '',
-      });
+      setRequestHeadersOnNextResponse(res, req, requestState);
     } else {
-      res.headers.set(constants.Headers.AuthStatus, authStatus);
-      res.headers.set(constants.Headers.AuthMessage, authMessage || '');
-      res.headers.set(constants.Headers.AuthReason, authReason || '');
-      rewriteURL.searchParams.set(constants.SearchParams.AuthStatus, authStatus);
-      rewriteURL.searchParams.set(constants.Headers.AuthMessage, authMessage || '');
-      rewriteURL.searchParams.set(constants.Headers.AuthReason, authReason || '');
+      injectRequestState(requestState, (k, v) => res?.headers.set(k, v));
+      injectRequestState(requestState, (k, v) => rewriteURL?.searchParams.set(k, v), 'SearchParams');
     }
+
     res.headers.set(nextConstants.Headers.NextRewrite, rewriteURL.href);
   }
 

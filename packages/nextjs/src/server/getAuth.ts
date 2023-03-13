@@ -11,17 +11,15 @@ import {
 
 import { API_KEY, API_URL, API_VERSION, SECRET_KEY } from './clerk';
 import type { RequestLike } from './types';
-import { getAuthKeyFromRequest, getCookie, getHeader, injectSSRStateIntoObject } from './utils';
+import { getAuthFromRequest, getCookie, getHeader, injectSSRStateIntoObject } from './utils';
 
 export const getAuth = (req: RequestLike): SignedInAuthObject | SignedOutAuthObject => {
   // When the auth status is set, we trust that the middleware has already run
   // Then, we don't have to re-verify the JWT here,
   // we can just strip out the claims manually.
-  const authStatus = getAuthKeyFromRequest(req, 'AuthStatus');
-  const authMessage = getAuthKeyFromRequest(req, 'AuthMessage');
-  const authReason = getAuthKeyFromRequest(req, 'AuthReason');
+  const auth = getAuthFromRequest(req);
 
-  if (!authStatus) {
+  if (!auth.status) {
     throw new Error(
       'You need to use "withClerkMiddleware" in your Next.js middleware file. See https://clerk.dev/docs/quickstarts/get-started-with-nextjs',
     );
@@ -32,12 +30,9 @@ export const getAuth = (req: RequestLike): SignedInAuthObject | SignedOutAuthObj
     secretKey: SECRET_KEY,
     apiUrl: API_URL,
     apiVersion: API_VERSION,
-    authStatus,
-    authMessage,
-    authReason,
   };
 
-  if (authStatus !== AuthStatus.SignedIn) {
+  if (auth.status !== AuthStatus.SignedIn) {
     return signedOutAuthObject(options);
   }
 
@@ -66,9 +61,7 @@ type BuildClerkPropsInitState = { user?: User | null; session?: Session | null; 
 type BuildClerkProps = (req: RequestLike, authState?: BuildClerkPropsInitState) => Record<string, unknown>;
 
 export const buildClerkProps: BuildClerkProps = (req, initState = {}) => {
-  const authStatus = getAuthKeyFromRequest(req, 'AuthStatus');
-  const authMessage = getAuthKeyFromRequest(req, 'AuthMessage');
-  const authReason = getAuthKeyFromRequest(req, 'AuthReason');
+  const { authStatus, authMessage, authReason } = getAuthFromRequest(req);
 
   const options = {
     apiKey: API_KEY,
