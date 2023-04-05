@@ -48,6 +48,11 @@ const common = ({ mode }) => {
     optimization: {
       splitChunks: {
         cacheGroups: {
+          zxcvbnVendor: {
+            test: /[\\/]node_modules[\\/](zxcvbn)[\\/]/,
+            name: 'vendor-zxcvbn',
+            chunks: 'all',
+          },
           common: {
             minChunks: 1,
             name: 'ui-common',
