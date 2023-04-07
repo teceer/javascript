@@ -4,11 +4,10 @@ import React, { forwardRef } from 'react';
 
 import { useEnvironment } from '../contexts';
 import { descriptors, Flex, Input } from '../customizables';
-import { scoreDescriptions, usePasswordComplexity, usePasswordStrength } from '../hooks';
+import { usePasswordComplexity, usePasswordStrength } from '../hooks';
 import { EyeSlash } from '../icons';
 import { useFormControl } from '../primitives/hooks';
 import type { PropsOfComponent } from '../styledSystem';
-import { common } from '../styledSystem';
 import { IconButton } from './IconButton';
 
 type PasswordInputProps = PropsOfComponent<typeof Input> & {
@@ -64,7 +63,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
 
   const { show_zxcvbn } = passwordSettings;
 
-  const { getScore, zxcvbnResult } = usePasswordStrength({
+  const { getScore } = usePasswordStrength({
     onValidationFailed: (_, errorMessage) => {
       setStrengthError(errorMessage);
     },
@@ -81,19 +80,13 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
   const __internalOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     // Lazy load `zxcvbn` on interaction
     if (strengthMeter && show_zxcvbn) {
-      void Promise.all([
-        import('@zxcvbn-ts/core'),
-        import('@zxcvbn-ts/language-common'),
-        import('@zxcvbn-ts/language-en'),
-      ])
-        .then(([core, zxcvbnCommonPackage, zxcvbnEnPackage]) => {
+      void Promise.all([import('@zxcvbn-ts/core'), import('@zxcvbn-ts/language-common')])
+        .then(([core, zxcvbnCommonPackage]) => {
           core.zxcvbnOptions.setOptions({
             dictionary: {
               ...zxcvbnCommonPackage.default.dictionary,
-              ...zxcvbnEnPackage.default.dictionary,
             },
             graphs: zxcvbnCommonPackage.default.adjacencyGraphs,
-            translations: zxcvbnEnPackage.default.translations,
           });
           return core.zxcvbn;
         })
@@ -124,21 +117,6 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
         type={hidden ? 'password' : 'text'}
         sx={theme => ({ paddingRight: theme.space.$10 })}
       />
-
-      {strengthMeter && show_zxcvbn && (
-        <Flex
-          sx={theme => ({
-            position: 'absolute',
-            top: -22,
-            right: 0,
-            marginBlock: 0,
-            marginRight: theme.space.$3,
-            ...common.textVariants(theme).smallMedium,
-          })}
-        >
-          <span>{zxcvbnResult && scoreDescriptions[zxcvbnResult.score]}</span>
-        </Flex>
-      )}
 
       <IconButton
         elementDescriptor={descriptors.formFieldInputShowPasswordButton}

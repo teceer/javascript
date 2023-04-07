@@ -48,17 +48,15 @@ const common = ({ mode }) => {
     optimization: {
       splitChunks: {
         cacheGroups: {
-          zxcvbnVendor: {
-            test: /[\\/]node_modules[\\/](zxcvbn)[\\/]/,
-            name: 'vendor-zxcvbn',
+          zxcvbnTSCoreVendor: {
+            test: /[\\/]node_modules[\\/](@zxcvbn-ts)[\\/](core)[\\/]/,
+            name: 'zxcvbn-ts-core',
             chunks: 'all',
           },
-          zxcvbnTSCoreVendor: {
-            test: /[\\/]node_modules[\\/](@zxcvbn-ts)[\\/]/,
-            name: 'vendor-zxcvbn-ts-core',
+          zxcvbnTSCommonVendor: {
+            test: /[\\/]node_modules[\\/](@zxcvbn-ts)[\\/](language-common)[\\/]/,
+            name: 'zxcvbn-common',
             chunks: 'all',
-            priority: -20,
-            minChunks: 1,
           },
           common: {
             minChunks: 1,

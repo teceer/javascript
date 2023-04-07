@@ -99,6 +99,43 @@ type _LocalizationResource = {
     requireUppercase: LocalizationValue;
     requireSpecialCharacter: LocalizationValue;
   };
+
+  zxcvbn: {
+    warnings: {
+      straightRow: string;
+      keyPattern: string;
+      simpleRepeat: string;
+      extendedRepeat: string;
+      sequences: string;
+      recentYears: string;
+      dates: string;
+      topTen: string;
+      topHundred: string;
+      common: string;
+      similarToCommon: string;
+      wordByItself: string;
+      namesByThemselves: string;
+      commonNames: string;
+      userInputs: string;
+      pwned: string;
+    };
+    suggestions: {
+      l33t: string;
+      reverseWords: string;
+      allUppercase: string;
+      capitalization: string;
+      dates: string;
+      recentYears: string;
+      associatedYears: string;
+      sequences: string;
+      repeated: string;
+      longerKeyboardPattern: string;
+      anotherWord: string;
+      useWords: string;
+      noNeed: string;
+      pwned: string;
+    };
+  };
   signUp: {
     start: {
       title: LocalizationValue;
