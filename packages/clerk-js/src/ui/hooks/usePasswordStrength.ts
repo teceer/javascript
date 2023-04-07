@@ -1,9 +1,8 @@
 import { useCallback, useState } from 'react';
-import type { ZXCVBNResult } from 'zxcvbn';
 
 import { useEnvironment } from '../contexts';
 
-type zxcvbnFN = (password: string, userInputs?: string[]) => ZXCVBNResult;
+type zxcvbnFN = (password: string, userInputs?: (string | number)[]) => any;
 
 export const usePasswordStrength = (callbacks?: {
   onValidationFailed?: (validationErrorMessages: string[], errorMessage: string) => void;
@@ -15,7 +14,7 @@ export const usePasswordStrength = (callbacks?: {
     },
   } = useEnvironment();
 
-  const [zxcvbnResult, setZxcvbnResult] = useState<ZXCVBNResult | undefined>(undefined);
+  const [zxcvbnResult, setZxcvbnResult] = useState<any | undefined>(undefined);
 
   const getScore = useCallback(
     (zxcvbn: zxcvbnFN) => (password: string) => {

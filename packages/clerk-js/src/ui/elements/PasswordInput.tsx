@@ -81,7 +81,23 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
   const __internalOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     // Lazy load `zxcvbn` on interaction
     if (strengthMeter && show_zxcvbn) {
-      void import('zxcvbn').then(module => module.default).then(zxcvbn => getScore(zxcvbn)(e.target.value));
+      void Promise.all([
+        import('@zxcvbn-ts/core'),
+        import('@zxcvbn-ts/language-common'),
+        import('@zxcvbn-ts/language-en'),
+      ])
+        .then(([core, zxcvbnCommonPackage, zxcvbnEnPackage]) => {
+          core.zxcvbnOptions.setOptions({
+            dictionary: {
+              ...zxcvbnCommonPackage.default.dictionary,
+              ...zxcvbnEnPackage.default.dictionary,
+            },
+            graphs: zxcvbnCommonPackage.default.adjacencyGraphs,
+            translations: zxcvbnEnPackage.default.translations,
+          });
+          return core.zxcvbn;
+        })
+        .then(zxcvbn => getScore(zxcvbn)(e.target.value));
     }
 
     if (complexity) {
