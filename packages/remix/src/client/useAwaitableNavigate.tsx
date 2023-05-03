@@ -1,11 +1,11 @@
-import { useNavigate, useTransition } from '@remix-run/react';
+import { useNavigate, useNavigation } from '@remix-run/react';
 import React from 'react';
 
 type Resolve = (value?: unknown) => void;
 
 export const useAwaitableNavigate = () => {
   const navigate = useNavigate();
-  const transition = useTransition();
+  const transition = useNavigation();
   const resolveFunctionsRef = React.useRef<Resolve[]>([]);
 
   const resolveAll = () => {
