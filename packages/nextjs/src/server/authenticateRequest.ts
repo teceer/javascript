@@ -11,6 +11,7 @@ import {
   JS_VERSION,
   PUBLISHABLE_KEY,
   SECRET_KEY,
+  SIGN_IN_URL,
 } from './clerkClient';
 import type { WithAuthOptions } from './types';
 import { getCookie } from './utils';
@@ -22,6 +23,7 @@ export const authenticateRequest = async (req: NextRequest, opts: WithAuthOption
   const headerToken = headers.get('authorization')?.replace('Bearer ', '');
   return await clerkClient.authenticateRequest({
     ...opts,
+    signInUrl: opts.signInUrl || SIGN_IN_URL,
     apiKey: opts.apiKey || API_KEY,
     secretKey: opts.secretKey || SECRET_KEY,
     frontendApi: opts.frontendApi || FRONTEND_API,
