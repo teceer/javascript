@@ -1,5 +1,5 @@
 {
-  "version": "4.10.3",
+  "version": "4.10.6",
   "license": "MIT",
   "type": "commonjs",
   "main": "./dist/index.js",
@@ -37,6 +37,7 @@
     "clean": "rimraf ./dist",
     "lint": "eslint .",
     "test": "jest",
+    "test:ci": "jest --maxWorkers=50%",
     "pack": "npm pack"
   },
   "name": "@clerk/clerk-sdk-node",
@@ -47,17 +48,15 @@
   },
   "devDependencies": {
     "@types/cookie": "^0.5.0",
-    "jest": "*",
     "nock": "^13.0.7",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.5.0",
-    "ts-jest": "*",
     "tsup": "*",
     "typescript": "*"
   },
   "dependencies": {
-    "@clerk/backend": "^0.21.0",
-    "@clerk/types": "^3.41.0",
+    "@clerk/backend": "^0.23.0",
+    "@clerk/types": "^3.42.0",
     "@types/cookies": "0.7.7",
     "@types/express": "4.17.14",
     "@types/node-fetch": "2.6.2",

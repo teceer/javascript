@@ -394,6 +394,7 @@ type _LocalizationResource = {
       fileDropAreaTitle: LocalizationValue;
       fileDropAreaAction: LocalizationValue;
       fileDropAreaHint: LocalizationValue;
+      readonly: LocalizationValue;
       successMessage: LocalizationValue;
     };
     usernamePage: {
@@ -462,6 +463,7 @@ type _LocalizationResource = {
     };
     passwordPage: {
       title: LocalizationValue;
+      readonly: LocalizationValue;
       successMessage: LocalizationValue;
       changePasswordTitle: LocalizationValue;
       changePasswordSuccessMessage: LocalizationValue;
@@ -612,6 +614,7 @@ type UnstableErrors = WithParamName<{
   form_password_pwned: LocalizationValue;
   form_username_invalid_length: LocalizationValue;
   form_param_format_invalid: LocalizationValue;
+  form_param_format_invalid__email_address: LocalizationValue;
   form_password_length_too_short: LocalizationValue;
   form_param_nil: LocalizationValue;
   form_code_incorrect: LocalizationValue;

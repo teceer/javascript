@@ -1,24 +1,20 @@
 # Change Log
 
-### [0.4.5](https://github.com/clerkinc/javascript/compare/@clerk/fastify@0.4.5-staging.4...@clerk/fastify@0.4.5) (2023-06-03)
+## 0.4.7
 
-**Note:** Version bump only for package @clerk/fastify
+### Patch Changes
 
-### [0.4.4](https://github.com/clerkinc/javascript/compare/@clerk/fastify@0.4.4-staging.0...@clerk/fastify@0.4.4) (2023-05-26)
+- Updated dependencies [[`c42b4ac0`](https://github.com/clerkinc/javascript/commit/c42b4ac02d7ab7022a06b8f484e057999c6d7963), [`010484f4`](https://github.com/clerkinc/javascript/commit/010484f4978b9616e8c2ef50986eda742c4967bd)]:
+  - @clerk/types@3.42.0
+  - @clerk/backend@0.23.0
 
-**Note:** Version bump only for package @clerk/fastify
+## 0.4.6
 
-### [0.4.3](https://github.com/clerkinc/javascript/compare/@clerk/fastify@0.4.3-staging.2...@clerk/fastify@0.4.3) (2023-05-23)
+### Patch Changes
 
-**Note:** Version bump only for package @clerk/fastify
-
-### [0.4.2](https://github.com/clerkinc/javascript/compare/@clerk/fastify@0.4.2-staging.1...@clerk/fastify@0.4.2) (2023-05-18)
-
-**Note:** Version bump only for package @clerk/fastify
-
-### [0.4.1](https://github.com/clerkinc/javascript/compare/@clerk/fastify@0.4.1-staging.1...@clerk/fastify@0.4.1) (2023-05-17)
-
-**Note:** Version bump only for package @clerk/fastify
+- Updated dependencies [[`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3)]:
+  - @clerk/backend@0.22.0
+  - @clerk/types@3.41.1
 
 ## [0.4.0](https://github.com/clerkinc/javascript/compare/@clerk/fastify@0.3.1-staging.3...@clerk/fastify@0.4.0) (2023-05-15)
 

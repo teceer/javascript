@@ -3,6 +3,7 @@ import { constants } from '@clerk/backend';
 import cookie from 'cookie';
 import type { IncomingMessage, ServerResponse } from 'http';
 
+import { loadApiEnv, loadClientEnv } from './clerkClient';
 import { handleValueOrFn, isHttpOrHttps, isProxyUrlRelative, isValidProxyUrl } from './shared';
 import type { ClerkMiddlewareOptions } from './types';
 
@@ -19,6 +20,7 @@ export async function loadInterstitial({
   clerkClient: ClerkClient;
   requestState: RequestState;
 }) {
+  const { clerkJSVersion, clerkJSUrl } = loadClientEnv();
   /**
    * When publishable key or frontendApi is present utilize the localInterstitial method
    * and avoid the extra network call
@@ -31,6 +33,8 @@ export async function loadInterstitial({
       signInUrl: requestState.signInUrl,
       isSatellite: requestState.isSatellite,
       domain: requestState.domain,
+      clerkJSVersion,
+      clerkJSUrl,
     });
   }
   return await clerkClient.remotePrivateInterstitial();
@@ -46,16 +50,16 @@ export const authenticateRequest = (opts: {
   options?: ClerkMiddlewareOptions;
 }) => {
   const { clerkClient, apiKey, secretKey, frontendApi, publishableKey, req, options } = opts;
-  const cookies = parseCookies(req);
-  const { jwtKey, authorizedParties } = options || {};
+  const { jwtKey, authorizedParties, audience } = options || {};
+
+  const env = { ...loadApiEnv(), ...loadClientEnv() };
 
   const requestUrl = getRequestUrl(req);
-  const isSatellite =
-    handleValueOrFn(options?.isSatellite, requestUrl) || process.env.CLERK_IS_SATELLITE === 'true' || false;
-  const domain = handleValueOrFn(options?.domain, requestUrl) || process.env.CLERK_DOMAIN || '';
-  const signInUrl = options?.signInUrl || process.env.CLERK_SIGN_IN_URL || '';
+  const isSatellite = handleValueOrFn(options?.isSatellite, requestUrl, env.isSatellite);
+  const domain = handleValueOrFn(options?.domain, requestUrl) || env.domain;
+  const signInUrl = options?.signInUrl || env.signInUrl;
   const proxyUrl = absoluteProxyUrl(
-    handleValueOrFn(options?.proxyUrl, requestUrl, process.env.CLERK_PROXY_URL) as string,
+    handleValueOrFn(options?.proxyUrl, requestUrl, env.proxyUrl),
     requestUrl.toString(),
   );
 
@@ -67,7 +71,10 @@ export const authenticateRequest = (opts: {
     throw new Error(satelliteAndMissingSignInUrl);
   }
 
+  const cookies = parseCookies(req);
+
   return clerkClient.authenticateRequest({
+    audience,
     apiKey,
     secretKey,
     frontendApi,

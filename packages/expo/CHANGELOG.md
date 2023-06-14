@@ -1,32 +1,24 @@
 # Change Log
 
-### [0.17.7](https://github.com/clerkinc/javascript/compare/@clerk/clerk-expo@0.17.7-staging.4...@clerk/clerk-expo@0.17.7) (2023-06-03)
+## 0.18.0
 
-**Note:** Version bump only for package @clerk/clerk-expo
+### Minor Changes
 
-### [0.17.6](https://github.com/clerkinc/javascript/compare/@clerk/clerk-expo@0.17.6-staging.0...@clerk/clerk-expo@0.17.6) (2023-05-26)
+- Export error helpers from the shared package to the framework specific packages ([#1308](https://github.com/clerkinc/javascript/pull/1308)) by [@desiprisg](https://github.com/desiprisg)
 
-**Note:** Version bump only for package @clerk/clerk-expo
+### Patch Changes
 
-### [0.17.5](https://github.com/clerkinc/javascript/compare/@clerk/clerk-expo@0.17.5-staging.0...@clerk/clerk-expo@0.17.5) (2023-05-23)
+- Updated dependencies [[`7af91bc3`](https://github.com/clerkinc/javascript/commit/7af91bc3ecc25cba04968b491e1e3c6ec32c18af), [`c42b4ac0`](https://github.com/clerkinc/javascript/commit/c42b4ac02d7ab7022a06b8f484e057999c6d7963), [`6f3d4305`](https://github.com/clerkinc/javascript/commit/6f3d43055690db1d69a356503a0a45dc948beaef), [`846b00b9`](https://github.com/clerkinc/javascript/commit/846b00b90167ab5a77456d32653a221faddd835a)]:
+  - @clerk/clerk-react@4.20.0
+  - @clerk/clerk-js@4.47.0
 
-**Note:** Version bump only for package @clerk/clerk-expo
+## 0.17.8
 
-### [0.17.4](https://github.com/clerkinc/javascript/compare/@clerk/clerk-expo@0.17.3...@clerk/clerk-expo@0.17.4) (2023-05-23)
+### Patch Changes
 
-**Note:** Version bump only for package @clerk/clerk-expo
-
-### [0.17.3](https://github.com/clerkinc/javascript/compare/@clerk/clerk-expo@0.17.3-staging.2...@clerk/clerk-expo@0.17.3) (2023-05-23)
-
-**Note:** Version bump only for package @clerk/clerk-expo
-
-### [0.17.2](https://github.com/clerkinc/javascript/compare/@clerk/clerk-expo@0.17.2-staging.1...@clerk/clerk-expo@0.17.2) (2023-05-18)
-
-**Note:** Version bump only for package @clerk/clerk-expo
-
-### [0.17.1](https://github.com/clerkinc/javascript/compare/@clerk/clerk-expo@0.17.1-staging.2...@clerk/clerk-expo@0.17.1) (2023-05-17)
-
-**Note:** Version bump only for package @clerk/clerk-expo
+- Updated dependencies [[`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3), [`b66ea0a5`](https://github.com/clerkinc/javascript/commit/b66ea0a5aea0d6801e03a1426a0db69921b7b0e3)]:
+  - @clerk/clerk-js@4.46.0
+  - @clerk/clerk-react@4.19.0
 
 ## [0.17.0](https://github.com/clerkinc/javascript/compare/@clerk/clerk-expo@0.16.5-staging.4...@clerk/clerk-expo@0.17.0) (2023-05-15)
 
