@@ -18,14 +18,28 @@ type Options = {
   informationText?: string;
 } & (
   | {
+      /**
+       * @deprecated
+       */
       complexity?: never;
+      /**
+       * @deprecated
+       */
       strengthMeter?: never;
+      validatePassword?: never;
       type?: Exclude<HTMLInputTypeAttribute, 'password'>;
     }
   | {
       type: Extract<HTMLInputTypeAttribute, 'password'>;
-      complexity: boolean;
-      strengthMeter: boolean;
+      validatePassword: boolean;
+      /**
+       * @deprecated
+       */
+      complexity?: boolean;
+      /**
+       * @deprecated
+       */
+      strengthMeter?: boolean;
     }
 );
 
@@ -128,7 +142,9 @@ export const useFormControl = <Id extends string>(
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { defaultChecked, ...restOpts } = opts;
+  const { defaultChecked, validatePassword: validatePasswordProp, ...restOpts } = opts;
+
+  // opts.validatePassword = opts.type === 'password' ? opts.validatePassword ?? false : false;
 
   const props = {
     id,
@@ -149,6 +165,7 @@ export const useFormControl = <Id extends string>(
     warningText,
     hasPassedComplexity,
     setHasPassedComplexity,
+    validatePassword: opts.type === 'password' ? opts.validatePassword : undefined,
     ...restOpts,
   };
 
