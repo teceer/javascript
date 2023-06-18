@@ -1,7 +1,7 @@
 import type { PasswordSettingsData } from '@clerk/types';
 import type { ZxcvbnResult } from '@zxcvbn-ts/core';
 
-import type { zxcvbnFN } from '../utils';
+import type { zxcvbnFN } from '../zxcvbn';
 
 export type PasswordStrength =
   | {
@@ -46,18 +46,3 @@ export const createValidatePasswordStrength = ({
       };
     };
 };
-// export const usePasswordStrength = ({ min_zxcvbn_strength }: Pick<PasswordSettingsData, 'min_zxcvbn_strength'>) => {
-//   const [zxcvbnResult, setZxcvbnResult] = useState<ZxcvbnResult | undefined>(undefined);
-//
-//   const getScore = useMemo(() => {
-//     return createValidatePasswordStrength({
-//       min_zxcvbn_strength,
-//       onResult: setZxcvbnResult,
-//     });
-//   }, []);
-//
-//   return {
-//     getScore,
-//     zxcvbnResult,
-//   };
-// };
