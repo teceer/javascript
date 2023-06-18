@@ -19,4 +19,3 @@ export * from './roleLocalizationKey';
 export * from './getRelativeToNowDateKey';
 export * from './mergeRefs';
 export * from './createSlug';
-export * from './zxcvbn';
