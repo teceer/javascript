@@ -32,7 +32,6 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
     ...rest
   } = props;
 
-  console.log('WOW', validatePassword);
   const {
     userSettings: { passwordSettings },
   } = useEnvironment();
@@ -55,7 +54,6 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
     setPassword(e.target.value);
     return onChangeProp?.(e);
   };
-  console.log('----rest', rest);
 
   return (
     <Flex
