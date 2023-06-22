@@ -4,7 +4,6 @@ import {
   handleValueOrFn,
   inClientSide,
   is4xxError,
-  isHttpOrHttps,
   isLegacyFrontendApiKey,
   isValidBrowserOnline,
   isValidProxyUrl,
@@ -57,7 +56,6 @@ import {
   appendAsQueryParams,
   buildURL,
   createBeforeUnloadTracker,
-  createCookieHandler,
   createPageLifecycle,
   errorThrower,
   getClerkQueryParam,
@@ -72,29 +70,18 @@ import {
   noOrganizationExists,
   noUserExists,
   pickRedirectionProp,
-  removeClerkQueryParam,
-  replaceClerkQueryParam,
   requiresUserInput,
   sessionExistsAndSingleSessionModeEnabled,
-  setDevBrowserJWTInURL,
-  stripOrigin,
   validateFrontendApi,
-  windowNavigate,
 } from '../utils';
 import { memoizeListenerCallback } from '../utils/memoizeStateListenerCallback';
-import { CLERK_REFERRER_PRIMARY, CLERK_SATELLITE_URL, CLERK_SYNCED, ERROR_CODES } from './constants';
+import { ERROR_CODES } from './constants';
 import type { DevBrowserHandler } from './devBrowserHandler';
 import createDevBrowserHandler from './devBrowserHandler';
-import {
-  clerkErrorInitFailed,
-  clerkMissingDevBrowserJwt,
-  clerkMissingProxyUrlAndDomain,
-  clerkMissingSignInUrlAsSatellite,
-  clerkOAuthCallbackDidNotCompleteSignInSignUp,
-  clerkRedirectUrlIsMissingScheme,
-} from './errors';
+import { clerkErrorInitFailed, clerkOAuthCallbackDidNotCompleteSignInSignUp } from './errors';
 import type { FapiClient, FapiRequestCallback } from './fapiClient';
 import createFapiClient from './fapiClient';
+import { buildUrlWithAuthUtil, navigateUtil, runMultiDomainSSO } from './multidomain';
 import {
   BaseResource,
   Client,
@@ -636,41 +623,17 @@ export default class Clerk implements ClerkInterface {
   };
 
   public navigate = async (to: string | undefined): Promise<unknown> => {
-    if (!to || !inBrowser()) {
-      return;
-    }
-
-    const toURL = new URL(to, window.location.href);
-    const customNavigate = this.#options.navigate;
-
-    if (toURL.origin !== window.location.origin || !customNavigate) {
-      windowNavigate(toURL);
-      return;
-    }
-
-    // React router only wants the path, search or hash portion.
-    return await customNavigate(stripOrigin(toURL));
+    return navigateUtil(to, {
+      customNavigate: this.#options.navigate,
+    });
   };
 
   public buildUrlWithAuth(to: string, options?: BuildUrlWithAuthParams): string {
-    if (this.#instanceType === 'production' || !this.#devBrowserHandler?.usesUrlBasedSessionSync()) {
-      return to;
-    }
-
-    const toURL = new URL(to, window.location.origin);
-
-    if (toURL.origin === window.location.origin) {
-      return toURL.href;
-    }
-
-    const devBrowserJwt = this.#devBrowserHandler?.getDevBrowserJWT();
-    if (!devBrowserJwt) {
-      return clerkMissingDevBrowserJwt();
-    }
-
-    const asQueryParam = !!options?.useQueryParam;
-
-    return setDevBrowserJWTInURL(toURL.href, devBrowserJwt, asQueryParam);
+    return buildUrlWithAuthUtil(
+      { instanceType: this.#instanceType, devBrowser: this.#devBrowserHandler! },
+      to,
+      options,
+    );
   }
 
   public buildSignInUrl(options?: RedirectOptions): string {
@@ -708,26 +671,6 @@ export default class Clerk implements ClerkInterface {
     }
     return this.buildUrlWithAuth(this.#environment.displayConfig.organizationProfileUrl);
   }
-
-  #redirectToSatellite = async (): Promise<unknown> => {
-    if (!inBrowser()) {
-      return;
-    }
-    const searchParams = new URLSearchParams({
-      [CLERK_SYNCED]: 'true',
-    });
-
-    const satelliteUrl = getClerkQueryParam(CLERK_SATELLITE_URL);
-    if (!satelliteUrl || !isHttpOrHttps(satelliteUrl)) {
-      clerkRedirectUrlIsMissingScheme();
-    }
-
-    const backToSatelliteUrl = buildURL(
-      { base: getClerkQueryParam(CLERK_SATELLITE_URL) as string, searchParams },
-      { stringify: true },
-    );
-    return this.navigate(this.buildUrlWithAuth(backToSatelliteUrl));
-  };
 
   public redirectWithAuth = async (to: string): Promise<unknown> => {
     if (inBrowser()) {
@@ -1082,101 +1025,6 @@ export default class Clerk implements ClerkInterface {
     return this.#componentControls?.ensureMounted().then(controls => controls.updateProps(props));
   };
 
-  #hasJustSynced = () => getClerkQueryParam(CLERK_SYNCED) === 'true';
-  #clearJustSynced = () => removeClerkQueryParam(CLERK_SYNCED);
-  /**
-   * @deprecated This will be removed in the next minor version
-   */
-  #isReturningFromPrimary = () => getClerkQueryParam(CLERK_REFERRER_PRIMARY) === 'true';
-  /**
-   * @deprecated This will be removed in the next minor version
-   */
-  #replacePrimaryReferrerWithClerkSynced = () => {
-    if (this.#options.isInterstitial) {
-      replaceClerkQueryParam(CLERK_REFERRER_PRIMARY, CLERK_SYNCED, 'true');
-    } else {
-      removeClerkQueryParam(CLERK_REFERRER_PRIMARY);
-    }
-  };
-
-  #buildSyncUrlForDevelopmentInstances = (): string => {
-    const searchParams = new URLSearchParams({
-      [CLERK_SATELLITE_URL]: window.location.href,
-    });
-    return buildURL({ base: this.#options.signInUrl, searchParams }, { stringify: true });
-  };
-
-  #buildSyncUrlForProductionInstances = (): string => {
-    let primarySyncUrl;
-
-    if (this.proxyUrl) {
-      const proxy = new URL(this.proxyUrl);
-      primarySyncUrl = new URL(`${proxy.pathname}/v1/client/sync`, proxy.origin);
-    } else if (this.domain) {
-      primarySyncUrl = new URL(`/v1/client/sync`, `https://${this.domain}`);
-    }
-
-    primarySyncUrl?.searchParams.append('redirect_url', window.location.href);
-
-    return primarySyncUrl?.toString() || '';
-  };
-
-  #shouldSyncWithPrimary = (): boolean => {
-    // TODO: Remove this in the minor release
-    if (this.#isReturningFromPrimary()) {
-      this.#replacePrimaryReferrerWithClerkSynced();
-      return false;
-    }
-
-    if (this.#hasJustSynced()) {
-      if (!this.#options.isInterstitial) {
-        this.#clearJustSynced();
-      }
-      return false;
-    }
-
-    if (!this.isSatellite) {
-      return false;
-    }
-
-    const cookieHandler = createCookieHandler();
-    return cookieHandler.getClientUatCookie() <= 0;
-  };
-
-  #shouldRedirectToSatellite = (): boolean => {
-    if (this.#instanceType === 'production') {
-      return false;
-    }
-
-    if (this.isSatellite) {
-      return false;
-    }
-
-    const satelliteUrl = getClerkQueryParam(CLERK_SATELLITE_URL);
-    return !!satelliteUrl;
-  };
-
-  #syncWithPrimary = async () => {
-    if (this.instanceType === 'development') {
-      await this.navigate(this.#buildSyncUrlForDevelopmentInstances());
-    } else if (this.instanceType === 'production') {
-      await this.navigate(this.#buildSyncUrlForProductionInstances());
-    }
-  };
-
-  #validateMultiDomainOptions = () => {
-    if (!this.isSatellite) {
-      return;
-    }
-    if (this.#instanceType === 'development' && !this.#options.signInUrl) {
-      clerkMissingSignInUrlAsSatellite();
-    }
-
-    if (!this.proxyUrl && !this.domain) {
-      clerkMissingProxyUrlAndDomain();
-    }
-  };
-
   #loadInStandardBrowser = async (): Promise<boolean> => {
     /**
      * 1. Create the devBrowser.
@@ -1187,15 +1035,17 @@ export default class Clerk implements ClerkInterface {
       fapiClient: this.#fapiClient,
     });
 
-    /**
-     * 2. Multidomain SSO handling
-     * If needed the app will attempt to sync with another app hosted in a different domain in order to acquire a session
-     * - for development instances it populates dev browser JWT and `devBrowserHandler.setup()` should not have run.
-     */
-    this.#validateMultiDomainOptions();
-    if (this.#shouldSyncWithPrimary()) {
-      await this.#syncWithPrimary();
-      // ClerkJS is not considered loaded during the sync/link process with the primary domain
+    const interruptsLoad = await runMultiDomainSSO(
+      {
+        ...this.#options,
+        proxyUrl: this.#proxyUrl,
+        domain: this.#domain,
+        instanceType: this.#instanceType,
+      },
+      this.#devBrowserHandler,
+    );
+
+    if (interruptsLoad) {
       return false;
     }
 
@@ -1208,15 +1058,6 @@ export default class Clerk implements ClerkInterface {
       await this.#devBrowserHandler.clear();
     } else {
       await this.#devBrowserHandler.setup();
-    }
-
-    /**
-     * 4. If the app is considered a primary domain and is in the middle of the sync/link flow, interact the loading of Clerk and redirect back to the satellite app
-     * Initially step 2 and 4 were considered one but for step 2 we need devBrowserHandler.setup() to not have run and step 4 requires a valid dev browser JWT
-     */
-    if (this.#shouldRedirectToSatellite()) {
-      await this.#redirectToSatellite();
-      return false;
     }
 
     /**
