@@ -98,11 +98,9 @@ export function authenticateRequest(args: LoaderFunctionArgs, opts: RootAuthLoad
     isSatellite,
     domain,
     signInUrl,
-    request: createIsomorphicRequest((Request, Headers) => {
-      // @ts-ignore
+    request: createIsomorphicRequest((Request: any, Headers: any) => {
       return new Request(requestURL, {
         method: request.method,
-        // @ts-ignore
         headers: new Headers(request.headers),
       });
     }),

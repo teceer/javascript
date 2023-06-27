@@ -117,6 +117,8 @@ export async function authenticateRequest(options: AuthenticateRequestOptions): 
     ? new URL(isomorphicRequest.url)?.searchParams
     : undefined;
 
+  const getHeaderFromIsomorphicReq = (key: string) => isomorphicRequest?.headers?.get(key) || undefined;
+
   options = {
     ...options,
     frontendApi: parsePublishableKey(options.publishableKey)?.frontendApi || options.frontendApi,
@@ -124,20 +126,16 @@ export async function authenticateRequest(options: AuthenticateRequestOptions): 
     apiVersion: options.apiVersion || API_VERSION,
     headerToken:
       stripAuthorizationHeader(options.headerToken) ||
-      stripAuthorizationHeader(isomorphicRequest?.headers?.get(constants.Headers.Authorization)) ||
-      undefined,
-    cookieToken: options.cookieToken || isomorphicRequestCookies?.(constants.Cookies.Session) || undefined,
-    clientUat: options.clientUat || isomorphicRequestCookies?.(constants.Cookies.ClientUat) || undefined,
-    origin: options.origin || isomorphicRequest?.headers?.get(constants.Headers.Origin) || undefined,
-    host: options.host || isomorphicRequest?.headers?.get(constants.Headers.Host) || undefined,
-    forwardedHost:
-      options.forwardedHost || isomorphicRequest?.headers?.get(constants.Headers.ForwardedHost) || undefined,
-    forwardedPort:
-      options.forwardedPort || isomorphicRequest?.headers?.get(constants.Headers.ForwardedPort) || undefined,
-    forwardedProto:
-      options.forwardedProto || isomorphicRequest?.headers?.get(constants.Headers.ForwardedProto) || undefined,
-    referrer: options.referrer || isomorphicRequest?.headers?.get(constants.Headers.Referrer) || undefined,
-    userAgent: options.userAgent || isomorphicRequest?.headers?.get(constants.Headers.UserAgent) || undefined,
+      stripAuthorizationHeader(getHeaderFromIsomorphicReq(constants.Headers.Authorization)),
+    cookieToken: options.cookieToken || isomorphicRequestCookies?.(constants.Cookies.Session),
+    clientUat: options.clientUat || isomorphicRequestCookies?.(constants.Cookies.ClientUat),
+    origin: options.origin || getHeaderFromIsomorphicReq(constants.Headers.Origin),
+    host: options.host || getHeaderFromIsomorphicReq(constants.Headers.Host),
+    forwardedHost: options.forwardedHost || getHeaderFromIsomorphicReq(constants.Headers.ForwardedHost),
+    forwardedPort: options.forwardedPort || getHeaderFromIsomorphicReq(constants.Headers.ForwardedPort),
+    forwardedProto: options.forwardedProto || getHeaderFromIsomorphicReq(constants.Headers.ForwardedProto),
+    referrer: options.referrer || getHeaderFromIsomorphicReq(constants.Headers.Referrer),
+    userAgent: options.userAgent || getHeaderFromIsomorphicReq(constants.Headers.UserAgent),
     searchParams: options.searchParams || isomorphicRequestSearchParams || undefined,
   };
 

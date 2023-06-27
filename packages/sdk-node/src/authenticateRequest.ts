@@ -68,11 +68,9 @@ export const authenticateRequest = (opts: AuthenticateRequestParams) => {
     isSatellite,
     domain,
     signInUrl,
-    request: createIsomorphicRequest((Request, Headers) => {
-      // @ts-ignore
+    request: createIsomorphicRequest((Request: any, Headers: any) => {
       return new Request(requestUrl, {
         method: req.method,
-        // @ts-ignore
         headers: new Headers(req.headers),
       });
     }),

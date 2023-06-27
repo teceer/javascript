@@ -29,11 +29,9 @@ export const authenticateRequest = async (req: NextRequest, opts: WithAuthOption
     domain,
     signInUrl,
     proxyUrl,
-    request: createIsomorphicRequest((Request, Headers) => {
-      // @ts-ignore
+    request: createIsomorphicRequest((Request: any, Headers: any) => {
       return new Request(req.url, {
         method: req.method,
-        // @ts-ignore
         headers: new Headers(req.headers),
       });
     }),

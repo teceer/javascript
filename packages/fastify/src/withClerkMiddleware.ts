@@ -19,8 +19,7 @@ export const withClerkMiddleware = (options: ClerkFastifyOptions) => {
       publishableKey,
       apiKey: constants.API_KEY,
       frontendApi: constants.FRONTEND_API,
-      request: createIsomorphicRequest((Request, Headers) => {
-        // @ts-ignore
+      request: createIsomorphicRequest((Request: any, Headers: any) => {
         const headers = new Headers(req.headers);
         headers.set(
           constants.Headers.ForwardedHost,
@@ -31,10 +30,8 @@ export const withClerkMiddleware = (options: ClerkFastifyOptions) => {
           getSingleValueFromArrayHeader(req.headers?.[constants.Headers.ForwardedPort]),
         );
         const reqUrl = isRelativeUrl(req.url) ? getAbsoluteUrlFromHeaders(req.url, headers) : req.url;
-        // @ts-ignore
         return new Request(reqUrl, {
           method: req.method,
-          // @ts-ignore
           headers,
         });
       }),
@@ -67,6 +64,8 @@ export const withClerkMiddleware = (options: ClerkFastifyOptions) => {
     req.auth = requestState.toAuth();
   };
 };
+
+// TODO: Move the utils below to shared package
 
 const getAbsoluteUrlFromHeaders = (url: string, headers: Headers): URL => {
   const forwardedProto = headers.get(constants.Headers.ForwardedProto);
