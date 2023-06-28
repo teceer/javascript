@@ -19,14 +19,17 @@
     "@commitlint/cli": "^16.0.2",
     "@commitlint/config-conventional": "^16.0.0",
     "@emotion/jest": "^11.11.0",
+    "@playwright/test": "^1.35.1",
     "@testing-library/dom": "^8.19.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
+    "@types/cross-spawn": "^6.0.2",
     "@types/jest": "^29.3.1",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
     "conventional-changelog-conventionalcommits": "^4.6.3",
+    "cross-spawn": "^7.0.3",
     "eslint": "^8.38.0",
     "eslint-config-custom": "*",
     "expect-type": "^0.16.0",
@@ -44,15 +47,18 @@
     "rimraf": "^5.0.0",
     "ts-jest": "^29.0.3",
     "tsup": "^6.7.0",
-    "turbo": "^1.10.3",
+    "turbo": "^1.10.6",
     "typescript": "4.9.4",
-    "zx": "^7.2.1"
+    "zx": "^7.2.2"
   },
   "scripts": {
     "dev": "turbo dev --filter=@clerk/* --filter=!@clerk/expo",
     "build": "turbo build --concurrency=${TURBO_CONCURRENCY:-2}",
     "test": "turbo test --concurrency=${TURBO_CONCURRENCY:-2}",
     "test:ci": "turbo test --concurrency=${TURBO_CONCURRENCY:-2}",
+    "test:integration": "npx playwright test --config ./integration/playwright.config.ts",
+    "test:integration:dev": "npm run test:integration -- --ui",
+    "test:integration:report": "npx playwright show-report",
     "clean": "turbo clean",
     "lint": "turbo lint",
     "bundlewatch": "turbo bundlewatch",
@@ -70,5 +76,8 @@
     "release:snapshot": "TURBO_CONCURRENCY=4 npm run build && npx changeset publish --tag snapshot --no-git-tag",
     "release:staging": "TURBO_CONCURRENCY=4 npm run build && npx changeset publish --tag staging --no-git-tag",
     "update:lockfile": "npm run nuke && npm install -D --arch=x64 --platform=linux turbo && npm install -D --arch=arm64 --platform=darwin turbo"
+  },
+  "dependencies": {
+    "get-port": "^7.0.0"
   }
 }

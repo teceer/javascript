@@ -66,3 +66,6 @@ packages/*/examples/*/package-lock.json
 packages/*/examples/*/yarn.lock
 playground/*/package-lock.json
 playground/*/yarn.lock
+/test-results/
+/playwright-report/
+/playwright/.cache/

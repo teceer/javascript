@@ -20,6 +20,7 @@ export type ClerkProviderProps = IsomorphicClerkOptions & {
 function ClerkProviderBase(props: ClerkProviderProps): JSX.Element {
   const { initialState, children, ...restIsomorphicClerkOptions } = props;
   const { frontendApi = '', publishableKey = '', Clerk: userInitialisedClerk } = restIsomorphicClerkOptions;
+  console.log('this is local :)');
 
   if (!userInitialisedClerk) {
     if (!publishableKey && !frontendApi) {
