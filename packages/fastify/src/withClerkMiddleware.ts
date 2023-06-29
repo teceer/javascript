@@ -19,16 +19,24 @@ export const withClerkMiddleware = (options: ClerkFastifyOptions) => {
       publishableKey,
       apiKey: constants.API_KEY,
       frontendApi: constants.FRONTEND_API,
-      request: createIsomorphicRequest((Request: any, Headers: any) => {
-        const headers = new Headers(req.headers);
-        headers.set(
-          constants.Headers.ForwardedHost,
-          getSingleValueFromArrayHeader(req.headers?.[constants.Headers.ForwardedHost]),
+      request: createIsomorphicRequest((Request, Headers) => {
+        const requestHeaders = Object.keys(req.headers).reduce(
+          (acc, key) => Object.assign(acc, { [key]: req?.headers[key] }),
+          {},
         );
-        headers.set(
-          constants.Headers.ForwardedPort,
-          getSingleValueFromArrayHeader(req.headers?.[constants.Headers.ForwardedPort]),
+        const headers = new Headers(requestHeaders);
+        const forwardedHostHeader = getSingleValueFromArrayHeader(
+          headers?.get(constants.Headers.ForwardedHost) || undefined,
         );
+        if (forwardedHostHeader) {
+          headers.set(constants.Headers.ForwardedHost, forwardedHostHeader);
+        }
+        const forwardedPortHeader = getSingleValueFromArrayHeader(
+          headers?.get(constants.Headers.ForwardedPort) || undefined,
+        );
+        if (forwardedPortHeader) {
+          headers.set(constants.Headers.ForwardedPort, forwardedPortHeader);
+        }
         const reqUrl = isRelativeUrl(req.url) ? getAbsoluteUrlFromHeaders(req.url, headers) : req.url;
         return new Request(reqUrl, {
           method: req.method,
@@ -66,7 +74,8 @@ export const withClerkMiddleware = (options: ClerkFastifyOptions) => {
 };
 
 // TODO: Move the utils below to shared package
-
+// Creating a Request object requires a valid absolute URL
+// Fastify's req.url is relative, so we need to construct an absolute URL
 const getAbsoluteUrlFromHeaders = (url: string, headers: Headers): URL => {
   const forwardedProto = headers.get(constants.Headers.ForwardedProto);
   const forwardedPort = headers.get(constants.Headers.ForwardedPort);

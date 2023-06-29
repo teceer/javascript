@@ -18,8 +18,8 @@ export function authenticateRequest(context: GetServerDataProps, options: WithSe
     secretKey: SECRET_KEY,
     frontendApi: FRONTEND_API,
     publishableKey: PUBLISHABLE_KEY,
-    request: createIsomorphicRequest((Request: any, Headers: any) => {
-      const headers = new Headers(context.headers);
+    request: createIsomorphicRequest((Request, Headers) => {
+      const headers = new Headers(Object.fromEntries(context.headers) as Record<string, string>);
       headers.set(
         constants.Headers.ForwardedHost,
         returnReferrerAsXForwardedHostToFixLocalDevGatsbyProxy(context.headers),

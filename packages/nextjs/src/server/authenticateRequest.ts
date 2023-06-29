@@ -1,4 +1,3 @@
-import { createIsomorphicRequest } from '@clerk/backend';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -29,12 +28,7 @@ export const authenticateRequest = async (req: NextRequest, opts: WithAuthOption
     domain,
     signInUrl,
     proxyUrl,
-    request: createIsomorphicRequest((Request: any, Headers: any) => {
-      return new Request(req.url, {
-        method: req.method,
-        headers: new Headers(req.headers),
-      });
-    }),
+    request: req,
   });
 };
 
