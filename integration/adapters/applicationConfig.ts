@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import { application } from './application.js';
 import type { Helpers } from './helpers.js';
-import { hash, helpers } from './helpers.js';
+import { helpers } from './helpers.js';
 import { shell } from './shell.js';
 
 export type ApplicationConfig = ReturnType<typeof applicationConfig>;
@@ -54,8 +54,8 @@ export const applicationConfig = () => {
       console.log(shell.chalk.bgGreen(`Creating project "${name}"`));
       const TMP_DIR = path.join(process.cwd(), '.temp_integration');
 
-      const projName = `${name}__${Date.now()}__${hash()}`;
-      // const projName = `__${name}`;
+      // const projName = `${name}__${Date.now()}__${hash()}`;
+      const projName = `__${name}`;
 
       const appDir = path.resolve(TMP_DIR, projName);
       await shell.fs.rmSync(path.join(appDir, 'node_modules'), { recursive: true, force: true });

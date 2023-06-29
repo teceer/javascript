@@ -1,8 +1,8 @@
 import { test } from '@playwright/test';
 
-import type { Application } from '../adapters/application.js';
-import { emailPasswordInstance } from '../configs/envs.js';
-import { nextAppRouterConfig } from '../configs/next.js';
+import type { Application } from '../adapters/application';
+import { emailPasswordInstance } from '../configs/envs';
+import { nextAppRouterConfig } from '../configs/next';
 
 test.describe('Next.js App Router smoke test', () => {
   let app: Application;
@@ -15,7 +15,7 @@ test.describe('Next.js App Router smoke test', () => {
 
   test.afterAll(async () => {
     console.log('after all');
-    await app.teardown();
+    // await app.teardown();
   });
 
   test('signs in', async ({ page }) => {
@@ -25,3 +25,5 @@ test.describe('Next.js App Router smoke test', () => {
     await page.goto(serverUrl);
   });
 });
+
+Request;
