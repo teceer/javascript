@@ -1,14 +1,17 @@
+// @ts-ignore
 import React from 'react';
 import './App.css';
-import { ClerkProvider, SignIn } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignIn, UserButton } from '@clerk/clerk-react';
 
 function App() {
   return (
-    <ClerkProvider publishableKey={process.env.REACT_APP_CLERK_PUBLISHABLE_KEY as string}>
-      <div className='App'>
+    <main>
+      <SignedOut>
         <SignIn />
-      </div>
-    </ClerkProvider>
+      </SignedOut>
+      <SignedIn>Signed In</SignedIn>
+      <UserButton afterSignOutUrl={'/'} />
+    </main>
   );
 }
 

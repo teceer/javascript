@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import type { Readable } from 'node:stream';
 
 // @ts-nocheck
 const raw = (val: any) => dedent(String.raw(val));
@@ -65,3 +66,13 @@ const dedent = (strings: string | Array<string>, ...values: Array<string>) => {
 };
 
 export const hash = () => randomBytes(5).toString('hex');
+
+export const waitUntilMessage = async (stream: Readable, message: string) => {
+  return new Promise<void>(resolve => {
+    stream.on('data', chunk => {
+      if (chunk.toString().includes(message)) {
+        resolve();
+      }
+    });
+  });
+};

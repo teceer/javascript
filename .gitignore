@@ -55,6 +55,7 @@ packages/*/coverage
 .next
 .dev.vars
 .env.local
+.env.json
 .yalc
 yalc.lock
 playground/*/build

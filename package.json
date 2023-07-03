@@ -30,12 +30,15 @@
     "@types/react-dom": "^18.0.8",
     "conventional-changelog-conventionalcommits": "^4.6.3",
     "cross-spawn": "^7.0.3",
+    "dotenv": "^16.3.1",
     "eslint": "^8.38.0",
     "eslint-config-custom": "*",
+    "execa": "^5.1.1",
     "expect-type": "^0.16.0",
     "fastify": "4.12.0",
     "fastify-plugin": "^4.5.0",
     "fs-extra": "^11.1.1",
+    "get-port": "^5.1.1",
     "globby": "^13.2.0",
     "husky": "^8.0.1",
     "jest": "^29.3.1",
@@ -45,19 +48,22 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rimraf": "^5.0.0",
+    "tree-kill": "^1.2.2",
     "ts-jest": "^29.0.3",
     "tsup": "^6.7.0",
     "turbo": "^1.10.6",
     "typescript": "4.9.4",
-    "zx": "^7.2.2"
+    "zx": "^5.3.0"
   },
   "scripts": {
     "dev": "turbo dev --filter=@clerk/* --filter=!@clerk/expo",
     "build": "turbo build --concurrency=${TURBO_CONCURRENCY:-2}",
     "test": "turbo test --concurrency=${TURBO_CONCURRENCY:-2}",
     "test:ci": "turbo test --concurrency=${TURBO_CONCURRENCY:-2}",
-    "test:integration": "npx playwright test --config ./integration/playwright.config.ts",
+    "test:integration": "npx playwright test --config integration/playwright.config.ts",
+    "test:integration:debug": "npx playwright test --config integration/playwright.config.ts --debug",
     "test:integration:dev": "npm run test:integration -- --ui",
+    "test:integration:codegen": "npx playwright codegen",
     "test:integration:report": "npx playwright show-report",
     "clean": "turbo clean",
     "lint": "turbo lint",
@@ -76,8 +82,5 @@
     "release:snapshot": "TURBO_CONCURRENCY=4 npm run build && npx changeset publish --tag snapshot --no-git-tag",
     "release:staging": "TURBO_CONCURRENCY=4 npm run build && npx changeset publish --tag staging --no-git-tag",
     "update:lockfile": "npm run nuke && npm install -D --arch=x64 --platform=linux turbo && npm install -D --arch=arm64 --platform=darwin turbo"
-  },
-  "dependencies": {
-    "get-port": "^7.0.0"
   }
 }

@@ -14,6 +14,12 @@ export const environmentConfig = () => {
     get privateVariables() {
       return [...envVars.private];
     },
+    clone: () => {
+      const res = environmentConfig();
+      envVars.private.forEach((v, k) => res.setEnvVariable('private', k, v));
+      envVars.public.forEach((v, k) => res.setEnvVariable('public', k, v));
+      return res;
+    },
   };
 
   return self;

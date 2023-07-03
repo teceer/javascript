@@ -1,9 +1,12 @@
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
 export const templates = {
-  'next-app-router': fileURLToPath(new URL('./next-app-router', import.meta.url)),
-  'react-cra': fileURLToPath(new URL('./react-cra', import.meta.url)),
-  'react-vite': fileURLToPath(new URL('./react-vite', import.meta.url)),
+  // __dirname and __filename are defined only in CJS files
+  // If /integration becomes a module in the future, use these helpers:
+  // 'next-app-router': fileURLToPath(new URL('./next-app-router', import.meta.url)),
+  'next-app-router': resolve(__dirname, './next-app-router'),
+  'react-cra': resolve(__dirname, './react-cra'),
+  'react-vite': resolve(__dirname, './react-vite'),
 } as const;
 
 if (new Set([...Object.values(templates)]).size !== Object.values(templates).length) {

@@ -1,83 +1,80 @@
-import type { Readable } from 'node:stream';
+import * as path from 'node:path';
 
-// @ts-ignore
-import getPort, { portNumbers } from 'get-port';
+import treekill from 'tree-kill';
 
+import { chalk, chunkLogger, fs, getPort, range, run, waitForIdleProcess } from '../utils';
 import type { ApplicationConfig } from './applicationConfig.js';
 import type { EnvironmentConfig } from './environment.js';
-import { shell } from './shell.js';
 
 export type Application = ReturnType<typeof application>;
 
 export const application = (config: ApplicationConfig, appDir: string) => {
   const { name, scripts, envWriter } = config;
-  const state = { completedSetup: false };
+  // TODO: Revise how serverUrl is set
+  // It is currently set by serve and dev
+  const state = { completedSetup: false, serverUrl: '' };
   const cleanupFns: { (): any }[] = [];
-
-  // [`exit`, `SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach(eventType => {
-  //   process.on(eventType, () => {
-  //     void self.stop();
-  //   });
-  // });
 
   const self = {
     name,
     scripts,
     appDir,
+    get serverUrl() {
+      return state.serverUrl;
+    },
     withEnv: async (env: EnvironmentConfig) => {
       return envWriter(appDir, env.publicVariables, env.privateVariables);
     },
-    setup: async () => {
-      if (!state.completedSetup) {
-        await shell.run(`cd ${appDir} && ${scripts.setup}`);
+    setup: async (opts?: { strategy?: 'ci' | 'i' | 'copy'; force?: boolean }) => {
+      const { strategy, force } = opts || {};
+      const nodeModulesExist = await fs.pathExists(path.resolve(appDir, 'node_modules'));
+      if (force || !nodeModulesExist) {
+        const logger = chunkLogger(chalk.bgYellow, `${name} :: setup`);
+        await run(scripts.setup, { cwd: appDir, logger });
         state.completedSetup = true;
       }
     },
-    dev: async () => {
-      console.info(shell.chalk.bgCyan(`${name} :: Starting dev server`));
-      const port = await getPort({ port: portNumbers(5000, 5100) });
+    dev: async (opts?: { port?: number }) => {
+      // const port = await getPort({ port: range(5000, 5100) });
+      const port = opts.port || (await getPort());
       const serverUrl = `http://localhost:${port}`;
-      const server = shell.run(`cd ${appDir} && PORT=${port} ${scripts.dev}`);
-      cleanupFns.push(() => server.kill());
-      // note: we're awaiting the message, so we are sure that the dev server is up and running,
-      // but we're not awaiting the process itself as we want to treat this as a detached spawn process
-      await waitUntilMessage(server.stdout, serverUrl);
+      const logger = chunkLogger(chalk.bgYellow, `${name} :: dev`);
+      const proc = run(scripts.dev, { cwd: appDir, env: { PORT: port.toString() }, logger });
+      cleanupFns.push(() => treekill(proc.pid, 'SIGKILL'));
+      await waitForIdleProcess(proc);
+      state.serverUrl = serverUrl;
       return { port, serverUrl };
     },
     build: async () => {
-      console.info(shell.chalk.bgCyan(`${name} :: Building prod bundle`));
-      await shell.run(`cd ${appDir} && ${scripts.build}`);
+      const logger = chunkLogger(chalk.bgYellow, `${name} :: build`);
+      await run(scripts.build, { cwd: appDir, logger });
     },
     serve: async () => {
-      console.info(shell.chalk.bgCyan(`${name} :: Starting prod server`));
-      const port = await getPort({ port: portNumbers(5000, 5100) });
+      const port = await getPort({ port: range(5000, 5100) });
       const serverUrl = `http://localhost:${port}`;
-      const server = shell.run(`cd ${appDir} && PORT=${port} ${scripts.serve}`);
-      cleanupFns.push(() => server.kill());
-      console.log(serverUrl);
-      await waitUntilMessage(server.stdout, serverUrl);
+      const logger = chunkLogger(chalk.bgYellow, `${name} :: build`);
+      const proc = run(scripts.build, { cwd: appDir, logger });
+      cleanupFns.push(() => treekill(proc.pid, 'SIGKILL'));
+      await waitForIdleProcess(proc);
+      state.serverUrl = serverUrl;
       return { port, serverUrl };
     },
     stop: async () => {
+      console.info(chalk.bgYellow(`${name} :: Stopping...`));
       await Promise.all(cleanupFns.map(fn => fn()));
       cleanupFns.splice(0, cleanupFns.length);
-      return Promise.resolve();
+      state.serverUrl = '';
+      return new Promise(res => setTimeout(res, 2000));
     },
     teardown: async () => {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.info(chalk.bgYellow(`${name} :: Tearing down...`));
       await self.stop();
-      await shell.fs.rmSync(appDir, { recursive: true, force: true });
+      try {
+        fs.rmSync(appDir, { recursive: true, force: true });
+      } catch (e) {
+        console.log(e);
+      }
     },
   };
   return self;
-};
-
-const waitUntilMessage = async (stream: Readable, message: string) => {
-  return new Promise<void>(resolve => {
-    stream.on('data', chunk => {
-      if (chunk.toString().includes(message)) {
-        resolve();
-      }
-    });
-  });
 };

@@ -1,9 +1,9 @@
-import path from 'node:path';
+import * as path from 'node:path';
 
+import { chalk, fs } from '../utils';
 import { application } from './application.js';
 import type { Helpers } from './helpers.js';
-import { helpers } from './helpers.js';
-import { shell } from './shell.js';
+import { hash, helpers } from './helpers.js';
 
 export type ApplicationConfig = ReturnType<typeof applicationConfig>;
 type Scripts = { dev: string; build: string; setup: string; serve: string };
@@ -50,32 +50,28 @@ export const applicationConfig = () => {
       scripts[name] = cmd;
       return self;
     },
-    commit: async () => {
-      console.log(shell.chalk.bgGreen(`Creating project "${name}"`));
+    commit: async (opts?: { stableHash?: string }) => {
+      const { stableHash } = opts || {};
+      console.log(chalk.bgGreen(`Creating project "${name}"`));
       const TMP_DIR = path.join(process.cwd(), '.temp_integration');
 
-      // const projName = `${name}__${Date.now()}__${hash()}`;
-      const projName = `__${name}`;
-
+      const projName = stableHash || `${name}__${Date.now()}__${hash()}`;
       const appDir = path.resolve(TMP_DIR, projName);
-      await shell.fs.rmSync(path.join(appDir, 'node_modules'), { recursive: true, force: true });
-
-      // await fs.remove(appDir);
 
       // Copy template files
       for (const template of templates) {
-        console.info(shell.chalk.yellow(`Copying template "${path.basename(template)}" -> ${appDir}`));
-        await shell.fs.ensureDir(appDir);
-        await shell.fs.copy(template, appDir, { overwrite: true, filter: path => !path.includes('node_modules') });
+        console.info(chalk.yellow(`Copying template "${path.basename(template)}" -> ${appDir}`));
+        await fs.ensureDir(appDir);
+        await fs.copy(template, appDir, { overwrite: true, filter: (p: string) => !p.includes('node_modules') });
       }
 
       // Create individual files
       await Promise.all(
         [...files].map(async ([pathname, contents]) => {
           const dest = path.resolve(appDir, pathname);
-          console.info(shell.chalk.yellow(`Copying file "${pathname}" -> ${dest}`));
-          await shell.fs.ensureFile(dest);
-          await shell.fs.writeFile(dest, contents);
+          console.info(chalk.yellow(`Copying file "${pathname}" -> ${dest}`));
+          await fs.ensureFile(dest);
+          await fs.writeFile(dest, contents);
         }),
       );
 
@@ -94,9 +90,9 @@ export const applicationConfig = () => {
       const defaultWriter = async (appDir: string, publicVars: [string, string][], privateVars: [string, string][]) => {
         // Create env files
         const envDest = path.join(appDir, '.env');
-        await shell.fs.ensureFile(envDest);
-        console.log(shell.chalk.yellow(`Creating env file ".env" -> ${envDest}`));
-        await shell.fs.writeFile(
+        await fs.ensureFile(envDest);
+        console.log(chalk.yellow(`Creating env file ".env" -> ${envDest}`));
+        await fs.writeFile(
           path.join(appDir, '.env'),
           publicVars.map(([k, v]) => `${envFormatters.public(k)}=${v}`).join('\n') +
             '\n' +
