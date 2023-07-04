@@ -34,6 +34,7 @@ export interface DisplayConfigJSON {
   create_organization_url: string;
   after_leave_organization_url: string;
   after_create_organization_url: string;
+  after_logo_click_url: string;
 }
 
 export interface DisplayConfigResource extends ClerkResource {
@@ -65,4 +66,5 @@ export interface DisplayConfigResource extends ClerkResource {
   createOrganizationUrl: string;
   afterLeaveOrganizationUrl: string;
   afterCreateOrganizationUrl: string;
+  afterLogoClickUrl: string;
 }

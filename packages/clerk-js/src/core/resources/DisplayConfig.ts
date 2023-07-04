@@ -34,6 +34,7 @@ export class DisplayConfig extends BaseResource implements DisplayConfigResource
   createOrganizationUrl!: string;
   afterLeaveOrganizationUrl!: string;
   afterCreateOrganizationUrl!: string;
+  afterLogoClickUrl!: string;
 
   public constructor(data: DisplayConfigJSON) {
     super();
@@ -74,6 +75,7 @@ export class DisplayConfig extends BaseResource implements DisplayConfigResource
     this.createOrganizationUrl = data.create_organization_url;
     this.afterLeaveOrganizationUrl = data.after_leave_organization_url;
     this.afterCreateOrganizationUrl = data.after_create_organization_url;
+    this.afterLogoClickUrl = data.after_logo_click_url;
     return this;
   }
 }
