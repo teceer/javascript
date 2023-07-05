@@ -30,9 +30,14 @@ export const LeaveOrganizationPage = () => {
 
   return (
     <ActionConfirmationPage
+      organizationName={organization?.name}
       title={localizationKeys('organizationProfile.profilePage.dangerSection.leaveOrganization.title')}
       messageLine1={localizationKeys('organizationProfile.profilePage.dangerSection.leaveOrganization.messageLine1')}
       messageLine2={localizationKeys('organizationProfile.profilePage.dangerSection.leaveOrganization.messageLine2')}
+      actionDescription={localizationKeys(
+        'organizationProfile.profilePage.dangerSection.leaveOrganization.actionDescription',
+        { organizationName: organization?.name },
+      )}
       submitLabel={localizationKeys('organizationProfile.profilePage.dangerSection.leaveOrganization.title')}
       successMessage={localizationKeys(
         'organizationProfile.profilePage.dangerSection.leaveOrganization.successMessage',
