@@ -111,6 +111,7 @@ const ActionConfirmationPage = withCardStateProvider((props: ActionConfirmationP
     type: 'text',
     label: localizationKeys('formFieldLabel__confirmDeletion'),
     isRequired: true,
+    placeholder: organizationName,
   });
 
   const canSubmit = actionDescription ? confirmationField.value === organizationName : true;
